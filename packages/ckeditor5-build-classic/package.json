@@ -1,6 +1,6 @@
 {
-  "name": "@ckeditor/ckeditor5-build-classic",
-  "version": "21.0.0",
+  "name": "@tager/admin-wysiwyg",
+  "version": "0.1.0",
   "description": "The classic editor build of CKEditor 5 – the best browser-based rich text editor.",
   "keywords": [
     "ckeditor5-build",
@@ -69,6 +69,10 @@
   },
   "scripts": {
     "build": "webpack --mode production",
-    "preversion": "npm run build"
+    "prepare": "yarn build",
+    "preversion": "yarn build"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
