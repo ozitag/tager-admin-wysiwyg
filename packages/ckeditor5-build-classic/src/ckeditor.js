@@ -103,6 +103,9 @@ ClassicEditor.defaultConfig = {
 			'redo'
 		]
 	},
+	mediaEmbed: {
+		previewsInData: true
+	},
 	image: {
 		toolbar: [
 			'imageStyle:full',

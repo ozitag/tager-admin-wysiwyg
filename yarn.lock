@@ -808,6 +808,11 @@
     url-parse "^1.4.7"
     uuid "^3.4.0"
 
+"@ckeditor/ckeditor5-build-classic@^21.0.0":
+  version "21.0.0"
+  resolved "https://registry.yarnpkg.com/@ckeditor/ckeditor5-build-classic/-/ckeditor5-build-classic-21.0.0.tgz#f34624fa28edbc4de917eee326db7de1f09c9c63"
+  integrity sha512-IYPXmc5Np7SzJVJbGNZk3OZEHnZ/WylbN1aFyfYdKMch9Be8mrCB9QQOqfsAEKD4SjXujYvn1jL0mM/EPZ8ECw==
+
 "@ckeditor/ckeditor5-collaboration-core@^21.0.0":
   version "21.0.0"
   resolved "https://registry.yarnpkg.com/@ckeditor/ckeditor5-collaboration-core/-/ckeditor5-collaboration-core-21.0.0.tgz#fd0d26e3d7259ef893fb440887984aa81159bbe5"
