@@ -13,6 +13,31 @@ import normalizeToolbarConfig from '@ckeditor/ckeditor5-ui/src/toolbar/normalize
 import { enablePlaceholder } from '@ckeditor/ckeditor5-engine/src/view/placeholder';
 import ElementReplacer from '@ckeditor/ckeditor5-utils/src/elementreplacer';
 
+function getComputedStyleProp( element, prop ) {
+	// eslint-disable-next-line no-undef
+	return window.getComputedStyle( element ).getPropertyValue( prop );
+}
+
+function isElementScrollableVertically( element ) {
+	const overflowValue = getComputedStyleProp( element, 'overflow-y' );
+	return overflowValue === 'auto' || overflowValue === 'scroll';
+}
+
+export function findScrollableContainer( element ) {
+	let currentParent = element.parentElement;
+
+	while ( currentParent ) {
+		if ( isElementScrollableVertically( currentParent ) ) {
+			return currentParent;
+		}
+
+		currentParent = currentParent.parentElement;
+	}
+
+	// eslint-disable-next-line no-undef
+	return document.body;
+}
+
 /**
  * The classic editor UI class.
  *

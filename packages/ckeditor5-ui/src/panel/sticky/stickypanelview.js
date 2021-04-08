@@ -13,6 +13,7 @@ import Template from '../../template';
 import toUnit from '@ckeditor/ckeditor5-utils/src/dom/tounit';
 
 import '../../../theme/components/panel/stickypanel.css';
+import { findScrollableContainer } from '../../../../ckeditor5-editor-classic/src/classiceditorui';
 
 const toPx = toUnit( 'px' );
 
@@ -247,6 +248,12 @@ export default class StickyPanelView extends View {
 	 */
 	_checkIfShouldBeSticky() {
 		const panelRect = this._panelRect = this._contentPanel.getBoundingClientRect();
+
+		const scrollableContainer = findScrollableContainer( this._contentPanel );
+		const topOffset = scrollableContainer.getBoundingClientRect().top;
+
+		this.set( 'viewportTopOffset', topOffset );
+
 		let limiterRect;
 
 		if ( !this.limiterElement ) {
