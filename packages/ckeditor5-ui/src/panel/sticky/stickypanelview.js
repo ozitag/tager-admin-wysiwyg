@@ -16,6 +16,29 @@ import '../../../theme/components/panel/stickypanel.css';
 
 const toPx = toUnit( 'px' );
 
+function getComputedStyleProp( element, prop ) {
+	return global.window.getComputedStyle( element ).getPropertyValue( prop );
+}
+
+function isElementScrollableVertically( element ) {
+	const overflowValue = getComputedStyleProp( element, 'overflow-y' );
+	return overflowValue === 'auto' || overflowValue === 'scroll';
+}
+
+export function findScrollableContainer( element ) {
+	let currentParent = element.parentElement;
+
+	while ( currentParent ) {
+		if ( isElementScrollableVertically( currentParent ) ) {
+			return currentParent;
+		}
+
+		currentParent = currentParent.parentElement;
+	}
+
+	return global.document.body;
+}
+
 /**
  * The sticky panel view class.
  */
@@ -228,9 +251,12 @@ export default class StickyPanelView extends View {
 		// Check if the panel should go into the sticky state immediately.
 		this._checkIfShouldBeSticky();
 
-		// Update sticky state of the panel as the window is being scrolled.
-		this.listenTo( global.window, 'scroll', () => {
-			this._checkIfShouldBeSticky();
+		global.window.requestAnimationFrame( () => {
+			const scrollableContainer = findScrollableContainer( this._contentPanel );
+			// Update sticky state of the panel as the window is being scrolled.
+			this.listenTo( scrollableContainer, 'scroll', () => {
+				this._checkIfShouldBeSticky();
+			} );
 		} );
 
 		// Synchronize with `model.isActive` because sticking an inactive panel is pointless.
@@ -247,6 +273,12 @@ export default class StickyPanelView extends View {
 	 */
 	_checkIfShouldBeSticky() {
 		const panelRect = this._panelRect = this._contentPanel.getBoundingClientRect();
+
+		const scrollableContainer = findScrollableContainer( this._contentPanel );
+		const topOffset = scrollableContainer.getBoundingClientRect().top;
+
+		this.set( 'viewportTopOffset', topOffset );
+
 		let limiterRect;
 
 		if ( !this.limiterElement ) {
