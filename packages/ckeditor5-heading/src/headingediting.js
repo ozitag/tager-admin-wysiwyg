@@ -39,9 +39,9 @@ export default class HeadingEditing extends Plugin {
 		editor.config.define( 'heading', {
 			options: [
 				{ model: 'paragraph', title: 'Paragraph', class: 'ck-heading_paragraph' },
-				{ model: 'heading1', view: 'h2', title: 'Heading 1', class: 'ck-heading_heading1' },
-				{ model: 'heading2', view: 'h3', title: 'Heading 2', class: 'ck-heading_heading2' },
-				{ model: 'heading3', view: 'h4', title: 'Heading 3', class: 'ck-heading_heading3' }
+				{ model: 'heading1', view: 'h2', title: 'Heading 2 - <h2>', class: 'ck-heading_heading1' },
+				{ model: 'heading2', view: 'h3', title: 'Heading 3 - <h3>', class: 'ck-heading_heading2' },
+				{ model: 'heading3', view: 'h4', title: 'Heading 4 - <h4>', class: 'ck-heading_heading3' }
 			]
 		} );
 	}
