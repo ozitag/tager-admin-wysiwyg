@@ -1,6 +1,6 @@
 {
   "name": "@tager/admin-wysiwyg",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "The classic editor build of CKEditor 5 – the best browser-based rich text editor.",
   "keywords": [
     "ckeditor5-build",

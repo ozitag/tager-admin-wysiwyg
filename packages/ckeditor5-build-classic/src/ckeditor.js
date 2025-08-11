@@ -78,6 +78,8 @@ ClassicEditor.builtinPlugins = [
 ClassicEditor.defaultConfig = {
 	toolbar: {
 		items: [
+			'undo',
+			'redo',
 			'heading',
 			'|',
 			'bold',
@@ -98,9 +100,7 @@ ClassicEditor.defaultConfig = {
 			'imageUpload',
 			'blockQuote',
 			'insertTable',
-			'mediaEmbed',
-			'undo',
-			'redo'
+			'mediaEmbed'
 		]
 	},
 	mediaEmbed: {
