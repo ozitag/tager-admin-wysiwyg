@@ -54,9 +54,15 @@ jobs:
           test -s dist/index.d.ts
           test -s dist/style.css
           node -e "
-            const s = require('fs').readFileSync('dist/index.mjs', 'utf8');
-            if (!s.includes('from\"ckeditor5\"') && !s.includes(\"from 'ckeditor5'\")) {
+            const fs = require('fs');
+            const s = fs.readFileSync('dist/index.mjs', 'utf8');
+            if (!/from\s*['\"]ckeditor5['\"]/.test(s)) {
               throw new Error('ckeditor5 вшит в бандл вместо того, чтобы остаться зависимостью');
+            }
+            // Вшитый CKEditor — это мегабайты; внешняя зависимость — килобайты.
+            const size = fs.statSync('dist/index.mjs').size;
+            if (size > 200 * 1024) {
+              throw new Error('dist/index.mjs неожиданно большой: ' + size + ' байт');
             }
           "
 
