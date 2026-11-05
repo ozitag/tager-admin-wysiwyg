@@ -1,12 +1,10 @@
 name: publish-package
 
-# Релизная ветка здесь — next, а не master: в npm публикуется именно она.
-# master остался форком монорепозитория CKEditor 5 v21 и к пакету
-# отношения не имеет.
+# Пуш в master публикует пакет в npm.
 on:
   push:
     branches:
-      - next
+      - master
   workflow_dispatch:
 
 permissions:
@@ -45,20 +43,20 @@ jobs:
         run: yarn install --frozen-lockfile
 
       - name: Build
-        # patch-package накладывает патчи на heading и sticky-панель,
-        # затем webpack собирает build/ckeditor.js
         run: yarn build
 
+      - name: Type check
+        run: yarn typecheck
+
       - name: Verify build output
-        # Бандл коммитится в репозиторий, поэтому сборка на CI обязана
-        # совпасть с закоммиченной. Расходится только год в баннере
-        # лицензии, который подставляется из текущей даты.
         run: |
-          test -s build/ckeditor.js
+          test -s dist/index.mjs
+          test -s dist/index.d.ts
+          test -s dist/style.css
           node -e "
-            const s = require('fs').readFileSync('build/ckeditor.js', 'utf8');
-            if (!s.includes('\"undo\",\"redo\"')) {
-              throw new Error('В собранном бандле нет ожидаемого порядка кнопок тулбара');
+            const s = require('fs').readFileSync('dist/index.mjs', 'utf8');
+            if (!s.includes('from\"ckeditor5\"') && !s.includes(\"from 'ckeditor5'\")) {
+              throw new Error('ckeditor5 вшит в бандл вместо того, чтобы остаться зависимостью');
             }
           "
 
