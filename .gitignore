@@ -1,9 +1,5 @@
-node_modules/
-build/
-coverage/
-packages/*/node_modules/
-docs/api/output.json
-external/
-lerna-debug.log
+node_modules
+dist
+*.tgz
 .idea
-.vscode
+.DS_Store

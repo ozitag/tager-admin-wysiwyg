@@ -1,0 +1,73 @@
+name: publish-package
+
+# Пуш в master публикует пакет в npm.
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: '20'
+          cache: 'yarn'
+
+      - name: Read package info
+        id: pkg
+        run: |
+          echo "name=$(node -p "require('./package.json').name")" >> "$GITHUB_OUTPUT"
+          echo "version=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+
+      - name: Check if version is already published
+        id: check
+        run: |
+          if npm view "${{ steps.pkg.outputs.name }}@${{ steps.pkg.outputs.version }}" version > /dev/null 2>&1; then
+            echo "Версия ${{ steps.pkg.outputs.version }} уже в npm — публикация будет пропущена."
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Build
+        run: yarn build
+
+      - name: Type check
+        run: yarn typecheck
+
+      - name: Verify build output
+        run: |
+          test -s dist/index.mjs
+          test -s dist/index.d.ts
+          test -s dist/style.css
+          node -e "
+            const s = require('fs').readFileSync('dist/index.mjs', 'utf8');
+            if (!s.includes('from\"ckeditor5\"') && !s.includes(\"from 'ckeditor5'\")) {
+              throw new Error('ckeditor5 вшит в бандл вместо того, чтобы остаться зависимостью');
+            }
+          "
+
+      - name: Publish to npm
+        # registry-url у setup-node намеренно не задан: он пишет .npmrc
+        # с плейсхолдером ${NODE_AUTH_TOKEN}, а setup-node@v7 больше не
+        # экспортирует заглушку — из-за этого падает yarn. Пишем .npmrc
+        # здесь, чтобы токен не был виден шагам сборки.
+        if: steps.check.outputs.exists == 'false'
+        run: |
+          echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" >> "$HOME/.npmrc"
+          npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
