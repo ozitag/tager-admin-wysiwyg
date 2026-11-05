@@ -1,0 +1,75 @@
+name: publish-package
+
+# Релизная ветка здесь — next, а не master: в npm публикуется именно она.
+# master остался форком монорепозитория CKEditor 5 v21 и к пакету
+# отношения не имеет.
+on:
+  push:
+    branches:
+      - next
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: '20'
+          cache: 'yarn'
+
+      - name: Read package info
+        id: pkg
+        run: |
+          echo "name=$(node -p "require('./package.json').name")" >> "$GITHUB_OUTPUT"
+          echo "version=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+
+      - name: Check if version is already published
+        id: check
+        run: |
+          if npm view "${{ steps.pkg.outputs.name }}@${{ steps.pkg.outputs.version }}" version > /dev/null 2>&1; then
+            echo "Версия ${{ steps.pkg.outputs.version }} уже в npm — публикация будет пропущена."
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Build
+        # patch-package накладывает патчи на heading и sticky-панель,
+        # затем webpack собирает build/ckeditor.js
+        run: yarn build
+
+      - name: Verify build output
+        # Бандл коммитится в репозиторий, поэтому сборка на CI обязана
+        # совпасть с закоммиченной. Расходится только год в баннере
+        # лицензии, который подставляется из текущей даты.
+        run: |
+          test -s build/ckeditor.js
+          node -e "
+            const s = require('fs').readFileSync('build/ckeditor.js', 'utf8');
+            if (!s.includes('\"undo\",\"redo\"')) {
+              throw new Error('В собранном бандле нет ожидаемого порядка кнопок тулбара');
+            }
+          "
+
+      - name: Publish to npm
+        # registry-url у setup-node намеренно не задан: он пишет .npmrc
+        # с плейсхолдером ${NODE_AUTH_TOKEN}, а setup-node@v7 больше не
+        # экспортирует заглушку — из-за этого падает yarn. Пишем .npmrc
+        # здесь, чтобы токен не был виден шагам сборки.
+        if: steps.check.outputs.exists == 'false'
+        run: |
+          echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" >> "$HOME/.npmrc"
+          npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

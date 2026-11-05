@@ -92,6 +92,9 @@ Editor.builtinPlugins = [
 Editor.defaultConfig = {
 	toolbar: {
 		items: [
+			'undo',
+			'redo',
+			'|',
 			'sourceEditing',
 			'|',
 			'heading',
@@ -115,9 +118,7 @@ Editor.defaultConfig = {
 			'insertTable',
 			'mediaEmbed',
 			'codeBlock',
-			'htmlEmbed',
-			'undo',
-			'redo'
+			'htmlEmbed'
 		]
 	},
 	language: 'en',
